@@ -9,4 +9,13 @@
 #   end
 
 # Create EntryPoints
-EntryPoint.create([{ name: 'A' }, { name: 'B' }, { name: 'C' }])
+entry_points = EntryPoint.create([{ name: 'A' }, { name: 'B' }, { name: 'C' }])
+
+Vehicle.create([{size: :small}, {size: :medium}, {size: :large}])
+
+# Parking Slots
+entry_points.each do |entry_point|
+  ParkingSlot.create(size: :sp, distances: { entry_point.id.to_s => 1 }.to_json, occupied: false)
+  ParkingSlot.create(size: :mp, distances: { entry_point.id.to_s => 2 }.to_json, occupied: false)
+  ParkingSlot.create(size: :lp, distances: { entry_point.id.to_s => 3 }.to_json, occupied: false)
+end
