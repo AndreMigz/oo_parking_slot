@@ -1,7 +1,10 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  size: 1
+  size: 0
 
 two:
   size: 1
+
+three:
+  size: 2

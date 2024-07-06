@@ -4,5 +4,5 @@ class ParkingSlot < ApplicationRecord
   enum size: { sp: 0, mp: 1, lp: 2 }
 
   validates :size, presence: true
-  validates :distance, presence: true
+  validates :distances, presence: true
 end
