@@ -40,7 +40,7 @@ class ParkingServiceTest < ActiveSupport::TestCase
 
     travel_to Time.now + 5.hours do
       fee = service.unpark_vehicle(session)
-      assert_equal 80, fee.dig(:fee)  # 40 for the first 3 hours, 2*20 for the next 2 hours
+      assert_equal 80, fee.dig(:parking_fee)  # 40 for the first 3 hours, 2*20 for the next 2 hours
       refute @small_slot.reload.occupied
     end
   end
@@ -52,8 +52,31 @@ class ParkingServiceTest < ActiveSupport::TestCase
 
     travel_to Time.now + 29.hours do
       fee = service.unpark_vehicle(session)
-      assert_equal 5100, fee.dig(:fee)  # 5000 for 24 hours, 40 for the first 3 hours, 5*20 for the next 5 hours
+      assert_equal 5100, fee.dig(:parking_fee)  # 5000 for 24 hours, 40 for the first 3 hours, 5*20 for the next 5 hours
       refute @small_slot.reload.occupied
+    end
+  end
+
+  test "vehicle returns within an hour" do
+    service = ParkingService.new(@entry_point, @vehicle_small)
+
+    # Initial parking
+    response = service.park_vehicle
+    session = ParkingSession.find_by(vehicle_id: @vehicle_small.id, parking_slot_id: response.dig(:assigned_slot, :id))
+    assert @small_slot.reload.occupied
+
+    # Unpark the vehicle
+    service.unpark_vehicle(session)
+    refute @small_slot.reload.occupied
+
+    # Vehicle return in less than an hour after unparking
+    travel_to Time.now + 30.minutes do
+      response = service.park_vehicle
+      session = ParkingSession.find_by(vehicle_id: @vehicle_small.id, parking_slot_id: response.dig(:assigned_slot, :id))
+
+      assert @small_slot.reload.occupied
+      assert_equal @small_slot.id, session.parking_slot.id
+      assert_equal response[:status_code], 201
     end
   end
 end
