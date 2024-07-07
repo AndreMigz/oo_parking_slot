@@ -15,7 +15,16 @@ Vehicle.create([{size: :small}, {size: :medium}, {size: :large}])
 
 # Parking Slots
 entry_points.each do |entry_point|
-  ParkingSlot.create(size: :sp, distances: { entry_point.id.to_s => 1 }.to_json, occupied: false)
-  ParkingSlot.create(size: :mp, distances: { entry_point.id.to_s => 2 }.to_json, occupied: false)
-  ParkingSlot.create(size: :lp, distances: { entry_point.id.to_s => 3 }.to_json, occupied: false)
+  [
+    { size: 'sp', distances: { entry_point.id.to_s => 1 }.to_json, occupied: false },
+    { size: 'mp', distances: { entry_point.id.to_s => 2 }.to_json, occupied: false },
+    { size: 'lp', distances: { entry_point.id.to_s => 3 }.to_json, occupied: false }
+  ].each_with_index do |slot_params, index|
+    ParkingSlot.create(
+      size: slot_params[:size],
+      distances: slot_params[:distances],
+      occupied: slot_params[:occupied],
+      name: "#{entry_point.name}#{index + 1}"
+    )
+  end
 end

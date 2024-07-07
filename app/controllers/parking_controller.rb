@@ -6,9 +6,8 @@ class ParkingController < ApplicationController
 
     if vehicle.present? && entry_point.present?
       service = ParkingService.new(entry_point,vehicle)
-      slot = service.park_vehicle
 
-      render json: { slot: slot, status: 'parked' }, status: :ok
+      render json: service.park_vehicle
     else
       render json: { error: 'Vehicle or entry point not found'}, status: :not_found
     end
@@ -21,10 +20,9 @@ class ParkingController < ApplicationController
       service = ParkingService.new(nil, nil)
       fee = service.unpark_vehicle(session)
 
-      render json: { parking_fee: fee, status: 'unparked' }, status: :ok
+      render json: service.unpark_vehicle(session)
     else
       render json: { error: 'Session not found'}, status: :not_found
     end
   end
-
 end

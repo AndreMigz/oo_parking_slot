@@ -1,33 +1,26 @@
 class ParkingService
-  FLAT_RATE = 40
-  HOURLY_RATES = { 'sp' => 20, 'mp' => 60, 'lp' => 100 }
-  DAILY_RATE = 5000
-
   def initialize(entry_point, vehicle)
-    @entry_point = entry_point
     @vehicle = vehicle
+    @entry_point = entry_point
   end
 
   def park_vehicle
-    suitable_slots = ParkingSlot.where(occupied: false).select do |slot|
-      slot_compatible?(slot, @vehicle.size)
+    slot_finder = SlotFinder.new(@vehicle)
+    recent_session = find_recent_session_with_exit_time
+
+    if recent_session && within_one_hour?(recent_session.exit_time)
+      recent_session.update(exit_time: nil)
+      return success_response(recent_session, recent_session.parking_slot, 200)
     end
 
-    filtered_slots = suitable_slots.select do |slot|
-      distances = distances_from_entry(slot)
-      distances.key?(@entry_point.id.to_s)
-    end
 
-    sorted_slots = filtered_slots.sort_by do |slot|
-      distances = distances_from_entry(slot)
-      distances[@entry_point.id.to_s]
-    end
+    suitable_slots = slot_finder.find_suitable_slots
+    return error_response('No suitable slots available', 404) if suitable_slots.empty?
 
-    assigned_slot = sorted_slots.first
-    assigned_slot.update(occupied: true)
+    entry_point_slots = find_entry_point_slots(suitable_slots)
+    return error_response('No suitable slots available', 404) if entry_point_slots.empty?
 
-    ParkingSession.create(vehicle: @vehicle, parking_slot: assigned_slot, entry_time: Time.now)
-    assigned_slot
+    assign_and_update_slot(entry_point_slots)
   end
 
   def unpark_vehicle(session)
@@ -35,46 +28,50 @@ class ParkingService
     session.update(exit_time: exit_time)
     session.parking_slot.update(occupied: false)
 
-    calculate_fees(session)
+    { fee: FeeCalculator.calculate(session) }
   end
 
   private
 
-  def slot_compatible?(slot, vehicle_size)
-    case vehicle_size
-    when 'small'
-      true
-    when 'medium'
-      slot.mp? || slot.lp?
-    when 'large'
-      slot.lp?
-    else
-      false
-    end
+  def find_recent_session_with_exit_time
+    ParkingSession.where(vehicle: @vehicle).where.not(exit_time: nil).order(exit_time: :desc).first
   end
 
-  def distances_from_entry(slot)
-    JSON.parse(slot.distances)
+  def within_one_hour?(exit_time)
+    exit_time && (Time.now - exit_time) <= 1.hour
   end
 
-  def calculate_fees(session)
-    duration = ((session.exit_time - session.entry_time) / 3600.0).ceil
-    if duration > 24
-      days = duration / 24
-      remainder = duration % 24
-      daily_charge = days * DAILY_RATE
-      remainder_charge = calculate_remainder_charge(session.parking_slot.size, remainder)
-      daily_charge + remainder_charge
-    else
-      calculate_remainder_charge(session.parking_slot.size, duration)
-    end
+  def find_entry_point_slots(suitable_slots)
+    entry_point_slots = SlotFinder.new(@vehicle).find_slots_near_entry(suitable_slots, @entry_point.id.to_s)
+    entry_point_slots.empty? ? SlotFinder.new(@vehicle).find_slots_near_any_entry(suitable_slots) : entry_point_slots
   end
 
-  def calculate_remainder_charge(slot_size, duration)
-    if duration <= 3
-      FLAT_RATE
-    else
-      FLAT_RATE + ((duration - 3) * HOURLY_RATES[slot_size])
-    end
+  def assign_and_update_slot(entry_point_slots)
+    assigned_slot = entry_point_slots.min_by { |slot| SlotFinder.new(@vehicle).distances_from_entry(slot)[@entry_point.id.to_s] || Float::INFINITY }
+    assigned_slot.update(occupied: true)
+
+    parking_session = ParkingSession.create(vehicle: @vehicle, parking_slot: assigned_slot, entry_time: Time.now)
+    success_response(parking_session, assigned_slot, 201)
+  end
+
+  def success_response(parking_session, assigned_slot, status)
+    {
+      status: 'success',
+      status_code: status,
+      parking_session: {
+        id: parking_session.id,
+        vehicle_id: parking_session.vehicle.id,
+        parking_slot_id: parking_session.parking_slot.id,
+        entry_time: parking_session.entry_time
+      },
+      assigned_slot: {
+        id: assigned_slot.id,
+        name: assigned_slot.name
+      }
+    }
+  end
+
+  def error_response(message, status)
+    { status: 'error', status_code: status, message: message }
   end
 end

@@ -1,0 +1,31 @@
+no_exit_time:
+  vehicle: small_vehicle
+  parking_slot: small_slot
+  entry_time: <%= Time.utc(2024, 7, 7, 10, 0, 0) %>
+  exit_time: nil
+  created_at: <%= Time.utc(2024, 7, 7, 10, 0, 0) %>
+  updated_at: <%= Time.utc(2024, 7, 7, 10, 0, 0) %>
+
+less_than_1_hour:
+  vehicle: medium_vehicle
+  parking_slot: medium_slot
+  entry_time: <%= Time.utc(2024, 7, 7, 12, 0, 0) %>
+  exit_time: <%= Time.utc(2024, 7, 7, 12, 30, 0) %>
+  created_at: <%= Time.utc(2024, 7, 7, 12, 0, 0) %>
+  updated_at: <%= Time.utc(2024, 7, 7, 12, 30, 0) %>
+
+less_than_24_hours:
+  vehicle: large_vehicle
+  parking_slot: large_slot
+  entry_time: <%= Time.utc(2024, 7, 6, 14, 0, 0) %>
+  exit_time: <%= Time.utc(2024, 7, 7, 13, 0, 0) %>
+  created_at: <%= Time.utc(2024, 7, 6, 14, 0, 0) %>
+  updated_at: <%= Time.utc(2024, 7, 7, 13, 0, 0) %>
+
+more_than_24_hours:
+  vehicle:  medium_vehicle
+  parking_slot: large_slot
+  entry_time: <%= Time.utc(2024, 7, 5, 10, 0, 0) %>
+  exit_time: <%= Time.utc(2024, 7, 7, 11, 0, 0) %>
+  created_at: <%= Time.utc(2024, 7, 5, 10, 0, 0) %>
+  updated_at: <%= Time.utc(2024, 7, 7, 11, 0, 0) %>

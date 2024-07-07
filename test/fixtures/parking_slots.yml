@@ -1,0 +1,17 @@
+small_slot:
+  name: A1
+  size: sp
+  distances: '{"one": 1}'
+  occupied: true
+
+medium_slot:
+  name: A2
+  size: mp
+  distances: '{"one": 2}'
+  occupied: false
+
+large_slot:
+  name: A3
+  size: lp
+  distances: '{"one": 3}'
+  occupied: false

@@ -1,10 +1,10 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
+small_vehicle:
   size: 0
 
-two:
+medium_vehicle:
   size: 1
 
-three:
+large_vehicle:
   size: 2

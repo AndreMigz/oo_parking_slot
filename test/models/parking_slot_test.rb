@@ -2,7 +2,7 @@ require "test_helper"
 
 class ParkingSlotTest < ActiveSupport::TestCase
   setup do
-    @parking_slot = ParkingSlot.new(size: :sp, distances: 100)
+    @parking_slot = ParkingSlot.new(size: :sp, distances: 100, name: 'C1')
   end
 
   test 'should be valid' do
