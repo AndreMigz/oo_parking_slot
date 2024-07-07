@@ -2,7 +2,7 @@ class EntryPointsController < ApplicationController
 
   def index
     entry_points = EntryPoint.all
-    render json: entry_points, status: :ok
+    render json: { entry_points: entry_points }, status: :ok
   end
 
   def create

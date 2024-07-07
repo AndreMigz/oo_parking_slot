@@ -13,7 +13,16 @@ class ParkingService
       slot_compatible?(slot, @vehicle.size)
     end
 
-    sorted_slots = suitable_slots.sort_by { |slot| distances_from_entry(slot)[@entry_point.id.to_s] }
+    filtered_slots = suitable_slots.select do |slot|
+      distances = distances_from_entry(slot)
+      distances.key?(@entry_point.id.to_s)
+    end
+
+    sorted_slots = filtered_slots.sort_by do |slot|
+      distances = distances_from_entry(slot)
+      distances[@entry_point.id.to_s]
+    end
+
     assigned_slot = sorted_slots.first
     assigned_slot.update(occupied: true)
 
