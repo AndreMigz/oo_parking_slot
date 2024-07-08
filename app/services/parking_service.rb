@@ -2,13 +2,13 @@ class ParkingService
   def initialize(entry_point, vehicle)
     @vehicle = vehicle
     @entry_point = entry_point
+    @slot_finder = SlotFinder.new(@vehicle)
   end
 
   def park_vehicle
-    slot_finder = SlotFinder.new(@vehicle)
     recent_session = find_recent_session_with_exit_time
 
-    suitable_slots = slot_finder.find_suitable_slots
+    suitable_slots = @slot_finder.find_suitable_slots
     return error_response('No suitable slots available', 404) if suitable_slots.empty?
 
     entry_point_slots = find_entry_point_slots(suitable_slots)
@@ -40,12 +40,12 @@ class ParkingService
   end
 
   def find_entry_point_slots(suitable_slots)
-    entry_point_slots = SlotFinder.new(@vehicle).find_slots_near_entry(suitable_slots, @entry_point.id.to_s)
-    entry_point_slots.empty? ? SlotFinder.new(@vehicle).find_slots_near_any_entry(suitable_slots) : entry_point_slots
+    entry_point_slots = @slot_finder.find_slots_near_entry(suitable_slots, @entry_point.id.to_s)
+    entry_point_slots.empty? ? @slot_finder.find_slots_near_any_entry(suitable_slots) : entry_point_slots
   end
 
   def assign_and_update_slot(entry_point_slots, recent_session)
-    assigned_slot = entry_point_slots.min_by { |slot| SlotFinder.new(@vehicle).distances_from_entry(slot)[@entry_point.id.to_s] || Float::INFINITY }
+    assigned_slot = entry_point_slots.min_by { |slot| @slot_finder.distances_from_entry(slot)[@entry_point.id.to_s] || Float::INFINITY }
 
     if recent_session.nil?
       parking_session = ParkingSession.create(vehicle: @vehicle, parking_slot: assigned_slot, entry_time: Time.now)
