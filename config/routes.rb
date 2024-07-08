@@ -9,6 +9,7 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   resources :entry_points, only: [:index, :create]
+  resources :vehicles, only: [:index, :create]
   post 'park', to: 'parking#park'
   post 'unpark', to: 'parking#unpark'
 end

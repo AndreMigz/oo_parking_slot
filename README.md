@@ -95,9 +95,9 @@
     - Endpoint: `/entry_points`
     - Method: `GET`
     - Sample Response:
-    ```json
-    {
-      "entry_points": [
+      ```json
+      {
+        "entry_points": [
           {
               "id": 1,
               "name": "A",
@@ -117,14 +117,49 @@
     - This creates a new entry point.
     - Endpoint: `/entry_points`
     - Method: `POST`
-    - Sample Response:
-    ```json
-    {
-      "entry_point":
+    - Request Body:
+      ```json
       {
-        "name": "New Entry point"
+        "entry_point":
+        {
+          "name": "New Entry point"
+        }
       }
-    }
-    ```
-    
-   
+      ```
+  - **Get Vehicle list**
+    - This gets the list of vehicles.
+    - Endpoint: `/vehicles`
+    - Method: `GET`
+    - Sample Response:
+      ```json
+      {
+        "vehicles": [
+          {
+            "id": 1,
+            "size": "small",
+            "created_at": "2024-07-07T05:14:09.104Z",
+            "updated_at": "2024-07-07T05:14:09.104Z"
+          },
+          {
+            "id": 2,
+            "size": "medium",
+            "created_at": "2024-07-07T05:14:09.113Z",
+            "updated_at": "2024-07-07T05:14:09.113Z"
+          }
+        ]
+      }
+      ```
+  - **Create vehicle**
+    - This creates a new vehicle.
+    - Endpoint: `/vehicles`
+    - Method: `POST`
+    - Request Body:
+      ```json
+      {
+        "vehicle":
+        {
+          // This accepts 3 values (small, medium, large)
+          "size": "small"
+        }
+      }
+      ```
