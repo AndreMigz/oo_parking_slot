@@ -43,7 +43,7 @@
 
   ```bash
   git clone https://github.com/AndreMigz/oo_parking_slot.git
-  cd wherezit
+  cd oo_parking_slot
   ```
 - Install dependencies
 
