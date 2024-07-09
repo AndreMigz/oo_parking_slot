@@ -12,7 +12,7 @@ class ParkingService
     return error_response('No suitable slots available', 404) unless suitable_slot.present?
 
     if recent_session && within_one_hour?(recent_session.exit_time)
-      assign_and_update_slot(suitable_slot, recent_session)
+      return assign_and_update_slot(suitable_slot, recent_session)
     end
 
     assign_and_update_slot(suitable_slot, nil)
@@ -29,7 +29,6 @@ class ParkingService
   end
 
   def assign_and_update_slot(assigned_slot, recent_session)
-
     if recent_session.nil?
       parking_session = ParkingSession.create(vehicle: @vehicle, parking_slot: assigned_slot, entry_time: Time.now)
     else

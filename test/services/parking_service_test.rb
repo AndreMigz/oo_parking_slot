@@ -13,22 +13,19 @@ class ParkingServiceTest < ActiveSupport::TestCase
   end
 
   test "park small vehicle in SP slot" do
-    service = ParkingService.new(@entry_point, @vehicle_small)
-    slot = service.park_vehicle
+    ParkingService.new(@entry_point, @vehicle_small).park_vehicle
 
     assert @small_slot.reload.occupied
   end
 
   test "park medium vehicle in MP slot" do
-    service = ParkingService.new(@entry_point, @vehicle_medium)
-    slot = service.park_vehicle
+    ParkingService.new(@entry_point, @vehicle_medium).park_vehicle
 
     assert @medium_slot.reload.occupied
   end
 
   test "park large vehicle in LP slot" do
-    service = ParkingService.new(@entry_point, @vehicle_large)
-    slot = service.park_vehicle
+    ParkingService.new(@entry_point, @vehicle_large).park_vehicle
 
     assert @large_slot.reload.occupied
   end
@@ -54,5 +51,14 @@ class ParkingServiceTest < ActiveSupport::TestCase
       assert_equal @small_slot.id, session.parking_slot.id
       assert_equal response[:status_code], 201
     end
+  end
+
+  test 'should return an error message if no parking slots are available' do
+    ParkingSlot.update_all(occupied: true)
+
+    service = ParkingService.new(@entry_point, @vehicle_medium)
+    slot = service.park_vehicle
+
+    assert_equal 'No suitable slots available', slot[:message]
   end
 end
