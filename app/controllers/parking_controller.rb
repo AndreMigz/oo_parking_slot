@@ -17,10 +17,9 @@ class ParkingController < ApplicationController
     session = ParkingSession.find_by(id: params[:session_id])
 
     if session.present?
-      service = ParkingService.new(nil, nil)
-      fee = service.unpark_vehicle(session)
+      service = UnparkingService.new(session)
 
-      render json: service.unpark_vehicle(session)
+      render json: service.unpark_vehicle, status: :ok
     else
       render json: { error: 'Session not found'}, status: :not_found
     end

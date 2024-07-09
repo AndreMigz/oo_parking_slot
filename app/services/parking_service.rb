@@ -21,14 +21,6 @@ class ParkingService
     assign_and_update_slot(entry_point_slots, nil)
   end
 
-  def unpark_vehicle(session)
-    exit_time = Time.now
-    session.update(exit_time: exit_time)
-    session.parking_slot.update(occupied: false)
-
-    { vehicle:session.vehicle, parking_fee: FeeCalculator.calculate(session) }
-  end
-
   private
 
   def find_recent_session_with_exit_time
