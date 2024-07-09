@@ -2,23 +2,20 @@ class ParkingService
   def initialize(entry_point, vehicle)
     @vehicle = vehicle
     @entry_point = entry_point
-    @slot_finder = SlotFinder.new(@vehicle)
+    @slot_finder = SlotFinder.new(@vehicle, @entry_point)
   end
 
   def park_vehicle
     recent_session = find_recent_session_with_exit_time
 
-    suitable_slots = @slot_finder.find_suitable_slots
-    return error_response('No suitable slots available', 404) if suitable_slots.empty?
-
-    entry_point_slots = find_entry_point_slots(suitable_slots)
-    return error_response('No suitable slots available', 404) if entry_point_slots.empty?
+    suitable_slot = @slot_finder.find_suitable_slot
+    return error_response('No suitable slots available', 404) unless suitable_slot.present?
 
     if recent_session && within_one_hour?(recent_session.exit_time)
-      assign_and_update_slot(entry_point_slots, recent_session)
+      assign_and_update_slot(suitable_slot, recent_session)
     end
 
-    assign_and_update_slot(entry_point_slots, nil)
+    assign_and_update_slot(suitable_slot, nil)
   end
 
   private
@@ -31,13 +28,7 @@ class ParkingService
     exit_time && (Time.now - exit_time) <= 1.hour
   end
 
-  def find_entry_point_slots(suitable_slots)
-    entry_point_slots = @slot_finder.find_slots_near_entry(suitable_slots, @entry_point.id.to_s)
-    entry_point_slots.empty? ? @slot_finder.find_slots_near_any_entry(suitable_slots) : entry_point_slots
-  end
-
-  def assign_and_update_slot(entry_point_slots, recent_session)
-    assigned_slot = entry_point_slots.min_by { |slot| @slot_finder.distances_from_entry(slot)[@entry_point.id.to_s] || Float::INFINITY }
+  def assign_and_update_slot(assigned_slot, recent_session)
 
     if recent_session.nil?
       parking_session = ParkingSession.create(vehicle: @vehicle, parking_slot: assigned_slot, entry_time: Time.now)
